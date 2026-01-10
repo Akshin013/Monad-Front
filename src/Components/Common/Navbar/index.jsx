@@ -3,6 +3,8 @@ import "@/styles/style.css";
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/app/Context/AuthContext";
+// import { FiCalculator } from "react-icons/fi";
+import CalculatorModal from "@/Components/CalculatorModal";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -81,6 +83,8 @@ export default function Navbar() {
               >
                 Logout
               </button>
+              
+
             </>
           ) : (
             // БЛОК ЛОГИН/РЕГ
@@ -91,6 +95,7 @@ export default function Navbar() {
               >
                 Login / Register
               </Link>
+              
             </div>
           )}
         </div>

@@ -1,6 +1,6 @@
 "use client";
-
 import Link from "next/link";
+import Breadcrumbs from "@/Components/Breadcrumbs";
 
 const CREDIT_CATEGORIES = [
   {
@@ -32,7 +32,16 @@ const CREDIT_CATEGORIES = [
 export default function CreditsCategoryGrid() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#050d1c] to-[#0b1f3a] py-10 px-4">
-      <h1 className="text-3xl font-bold text-white text-center mb-10">Кредиты</h1>
+      <div className=" bg-[#050d1c] px-4 ">
+        {/* Хлебные крошки */}
+        <Breadcrumbs
+          items={[{ label: "Главная", href: "/" }, { label: "Кредиты" }]}
+        />
+      </div>
+
+      <h1 className="text-3xl font-bold text-white text-center mb-10">
+        Кредиты
+      </h1>
 
       <div className="max-w-6xl mx-auto grid gap-6 lg:grid-cols-2">
         {CREDIT_CATEGORIES.map((cat) => (

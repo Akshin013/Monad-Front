@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Breadcrumbs from "@/Components/Breadcrumbs";
 
 const CREDIT_SUBTYPE_MAP = {
   CONSUMER_LOAN: "Потребительский кредит",

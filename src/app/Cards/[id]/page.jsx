@@ -1,7 +1,7 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Breadcrumbs from "@/Components/Breadcrumbs";
 
 const subtypeMap = {
   DEBIT_CARD: "Дебетовая карта",
@@ -52,6 +52,13 @@ export default function CardDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#050d1c] to-[#0b1f3a] px-4 py-10">
+      <div className=" bg-[#050d1c] px-4 ">
+        {/* Хлебные крошки */}
+        <Breadcrumbs
+          items={[{ label: "Главная", href: "/" }, { label: "Карты", href: "/Cards" }, { label: "Карта" }]}
+        />
+      </div>
+
       <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
 
         {/* 🪪 Визуал карты */}

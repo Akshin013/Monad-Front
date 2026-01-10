@@ -1,18 +1,22 @@
-import React from 'react'
+"use client";
+import React from "react";
 import Link from "next/link";
 
 const Home = () => {
   return (
-    <div className=''>
-      Home
-      <div className="grid grid-cols-1  sm:grid-cols-2 md:grid-cols-3 gap-4 h-80 text-xl">
+     
+    <div className="min-h-screen bg-gradient-to-b from-[#050d1c] to-[#0b1f3a] p-6">
+      <h1 className="text-4xl font-bold text-white text-center mb-10">
+        Добро пожаловать
+      </h1>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 h-auto text-xl">
         {/* COLUMN 1 */}
         <div className="grid grid-rows-2 gap-4">
-          <div className="card-center flex justify-center items-center  bg-gray-300 rounded-xl">
+          <div className="h-40 flex justify-center items-center bg-blue-900 rounded-xl shadow-lg text-white font-semibold transition transform hover:scale-105 hover:shadow-2xl">
             Подбор кредита
           </div>
-          <div className="card-center flex justify-center items-center bg-gray-300 rounded-xl text-black">
+          <div className="h-40 flex justify-center items-center bg-blue-900 rounded-xl shadow-lg text-white font-semibold transition transform hover:scale-105 hover:shadow-2xl">
             КАСКО
           </div>
         </div>
@@ -20,37 +24,47 @@ const Home = () => {
         {/* COLUMN 2 */}
         <div className="grid grid-rows-[1fr_1fr] gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <Link href="/Credits" className="card-center flex justify-center items-center bg-gray-300 rounded-xl">
+            <Link
+              href="/Credits"
+              className="h-40 flex justify-center items-center bg-blue-900 rounded-xl shadow-lg text-white font-semibold transition transform hover:scale-105 hover:shadow-2xl"
+            >
               Кредиты
             </Link>
-            <Link href="/CreditCards" className="card-center flex justify-center items-center bg-gray-300 rounded-xl">
+            <Link
+              href="/Cards?tab=CREDIT"
+              className="h-40 flex justify-center items-center bg-blue-900 rounded-xl shadow-lg text-white font-semibold transition transform hover:scale-105 hover:shadow-2xl"
+            >
               Кредитные карты
             </Link>
           </div>
-          <div className="card-center bg-gray-300 flex justify-center items-center rounded-xl">
+          <Link
+            href="/Cards?tab=DEBIT"
+            className="h-40 flex justify-center items-center bg-blue-900 rounded-xl shadow-lg text-white font-semibold transition transform hover:scale-105 hover:shadow-2xl"
+          >
             Дебетовые карты
-          </div>
+          </Link>
         </div>
 
         {/* COLUMN 3 */}
-        <div className="grid grid-rows-[1fr_1fr] text-center  gap-4">
+        <div className="grid grid-rows-[1fr_1fr] gap-4">
           <div className="grid grid-cols-2 gap-4">
-            <Link href="/Credits/Auto" className="card-center flex justify-center items-center bg-gray-300 rounded-xl">
+            <Link
+              href="/Credits/Auto"
+              className="h-40 flex justify-center items-center bg-blue-900 rounded-xl shadow-lg text-white font-semibold transition transform hover:scale-105 hover:shadow-2xl"
+            >
               Автокредиты
             </Link>
-            <div className="card-center bg-gray-300 flex justify-center items-center rounded-xl">
+            <div className="h-40 flex justify-center text-center items-center bg-blue-900 rounded-xl shadow-lg text-white font-semibold transition transform hover:scale-105 hover:shadow-2xl">
               Банки Азербайджана
             </div>
           </div>
-          <div className="card-center bg-gray-300 flex justify-center items-center rounded-xl">
+          <div className="h-40 flex justify-center items-center bg-blue-900 rounded-xl shadow-lg text-white font-semibold transition transform hover:scale-105 hover:shadow-2xl">
             Подбор карт
           </div>
         </div>
-
       </div>
-
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

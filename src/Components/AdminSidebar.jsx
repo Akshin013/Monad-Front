@@ -10,7 +10,7 @@ export default function AdminSidebar() {
     { name: "Dashboard", href: "/admin" },
     { name: "Пользователи", href: "/admin/users" },
     { name: "Дилеры", href: "/admin/dealers" },
-    { name: "Баннеры", href: "/admin/banners" },
+    { name: "Баннеры", href: "/admin/products" },
   ];
 
   return (
