@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
-import Breadcrumbs from "@/Components/Breadcrumbs";
+import Breadcrumbs from "../../../Components/Breadcrumbs";
 import Link from "next/link";
 
 const TERMS = [
@@ -27,7 +27,7 @@ export default function ConsumerLoansPage() {
     const fetchConsumerLoans = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/products?category=CREDIT&subtype=CONSUMER_LOAN"
+          `${process.env.NEXT_PUBLIC_API_URL}/products?category=CREDIT&subtype=CONSUMER_LOAN`
         );
         const data = await res.json();
         setProducts(data);

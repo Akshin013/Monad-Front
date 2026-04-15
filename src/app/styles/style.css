@@ -1,0 +1,119 @@
+/* Общие стили */
+@import "tailwindcss";
+
+
+:root {
+  --navy-900: #020617;
+  --navy-800: #020b2d;
+  --navy-700: #061a40;
+  --navy-600: #0b2a6f;
+
+  --gold: #d4af37;
+  --blue-accent: #3b82f6;
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+
+  --card-bg: #020b2d;
+  --border-dark: #1e293b;
+}
+
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #05204A;
+  color: white;
+}
+
+/* Navbar */
+.navbar {
+  background-color: #0B3D91;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar a {
+  color: #1E90FF;
+  text-decoration: none;
+  margin-left: 16px;
+}
+
+.navbar a:hover {
+  color: #63B3ED;
+}
+
+/* .navbar button {
+  background-color: #1E90FF;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+} */
+
+.navbar button:hover {
+  background-color: #1A73E8;
+}
+
+/* Forms */
+.form-container {
+  background-color: #0B3D91;
+  padding: 32px;
+  border-radius: 12px;
+  width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+input, button {
+  font-family: 'Inter', sans-serif;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 6px;
+  border: none;
+  background-color: #4B6CB7;
+  color: white;
+}
+
+input::placeholder {
+  color: #D1D5DB;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: none;
+  background-color: #1E90FF;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1A73E8;
+}
+
+/* Cards / Modals */
+.card, .modal {
+  background-color: #0B3D91;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* utility classes using CSS variables */
+.bg-primary { background-color: var(--navy-600) !important; }
+.bg-primary-dark { background-color: var(--navy-700) !important; }
+.text-primary { color: var(--navy-600) !important; }
+.border-primary { border-color: var(--navy-600) !important; }
+.from-primary { --tw-gradient-from: var(--navy-600) !important; }
+.to-primary { --tw-gradient-to: var(--navy-600) !important; }
+

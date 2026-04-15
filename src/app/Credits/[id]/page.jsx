@@ -9,7 +9,7 @@ export default function CreditDetailPage() {
   useEffect(() => {
     const fetchCredit = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${params.id}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${params.id}`);
         const data = await res.json();
         setCredit(data);
       } catch (err) {
@@ -26,7 +26,7 @@ export default function CreditDetailPage() {
       <h1 className="text-3xl font-bold text-white mb-6 text-center">{credit.title}</h1>
 
       <div className="max-w-4xl mx-auto bg-[#08162c] rounded-2xl shadow-xl p-6 flex flex-col gap-4 text-white">
-        <p><strong>Тип кредита:</strong> {CREDIT_SUBTYPE_MAP[credit.subtype]}</p>
+        {/* <p><strong>Тип кредита:</strong> {CREDIT_SUBTYPE_MAP[credit.subtype]}</p> */}
         <p><strong>Банк:</strong> {credit.provider?.name || "Банк"}</p>
         <p><strong>Сумма:</strong> {credit.credit?.minAmount} – {credit.credit?.maxAmount} ₼</p>
         <p><strong>Срок:</strong> {credit.credit?.minTerm} – {credit.credit?.maxTerm} мес</p>

@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { apiRequest } from "@/Services/api.js";
+import { useAuth } from "../../../hooks/useAuth.js";
+import { useRouter } from "next/navigation"; // ✅ добавили
 
 export default function ForgotPasswordPage() {
+  const { forgotPassword } = useAuth();
+  const router = useRouter(); // ✅ добавили
+
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -14,41 +18,68 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError("");
     setMessage("");
-    try {
-      await apiRequest("/forgot-password", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
-      setMessage("Код для восстановления отправлен на почту!");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+
+    const res = await forgotPassword(email);
+
+    if (!res.success) {
+      setError(res.message);
+    } else {
+      setMessage(res.message);
+
+      // ✅ Редирект с email в query
+      setTimeout(() => {
+        router.push(`/Auth/Reset-password?email=${encodeURIComponent(email)}`);
+      }, 800);
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#05204A] text-white">
-      <form className="bg-[#0B3D91] p-8 rounded-lg shadow-lg w-96" onSubmit={handleSubmit}>
-        <h1 className="text-2xl font-bold mb-6 text-center">Восстановление пароля</h1>
-        {error && <div className="bg-red-500 p-2 rounded mb-4 text-center">{error}</div>}
-        {message && <div className="bg-green-500 p-2 rounded mb-4 text-center">{message}</div>}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 px-4">
+      <form
+        className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm"
+        onSubmit={handleSubmit}
+      >
+        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
+          Восстановление пароля
+        </h1>
+
+        {error && (
+          <div className="bg-red-100 text-red-700 p-2 rounded mb-4 text-center font-medium">
+            {error}
+          </div>
+        )}
+
+        {message && (
+          <div className="bg-green-100 text-green-700 p-2 rounded mb-4 text-center font-medium">
+            {message}
+          </div>
+        )}
 
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 rounded mb-6 bg-[#4B6CB7] text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1E90FF]"
+          className="w-full p-3 mb-6 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           required
         />
+
         <button
           type="submit"
-          className="w-full bg-[#1E90FF] py-3 rounded font-semibold hover:bg-blue-700 transition"
           disabled={loading}
+          className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg disabled:opacity-50"
         >
           {loading ? "Отправка..." : "Отправить код"}
         </button>
+
+        <p
+          className="mt-4 text-center text-sm text-blue-600 hover:underline cursor-pointer"
+          onClick={() => window.history.back()}
+        >
+          Вернуться назад
+        </p>
       </form>
     </div>
   );

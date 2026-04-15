@@ -5,7 +5,7 @@ export default function ProductCard({ product }) {
     <div className="card">
       <img
         src={product.image || "/images/no-image.png"}
-        className="h-44 w-full object-cover rounded-xl mb-4"
+        className="h-20 w-full object-cover rounded-xl mb-4"
         alt={product.title}
       />
 
@@ -13,7 +13,7 @@ export default function ProductCard({ product }) {
       <p className="text-gray-400 mt-1">{product.price} $</p>
 
       <Link
-        href={`/products/${product._id}`}
+        href={`/Products/${product._id}`}
         className="inline-block mt-4 text-gold hover:underline"
       >
         View details →

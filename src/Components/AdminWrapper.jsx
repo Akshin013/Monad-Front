@@ -2,7 +2,7 @@
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/Context/AuthContext";
+import { useAuth } from "../app/Context/AuthContext";
 
 export default function AdminWrapper({ children }) {
   const { user } = useAuth();

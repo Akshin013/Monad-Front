@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@/app/Context/AuthContext";
+// import { useAuth } from "../../Context/AuthContext";
+import { useAuth } from "../../../hooks/useAuth.js";
 import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
@@ -26,23 +27,35 @@ export default function AdminLoginPage() {
         return;
       }
 
-      router.push("/admin"); // редирект на админ панель
+      router.push("/Admin"); // редирект на админ панель
     } else {
       setMessage(data.message || "Неверный email или пароль");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-20 left-1/3 h-72 w-72 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="absolute bottom-0 right-10 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
+      </div>
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded shadow-md w-96"
+        className="relative z-10 w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/85 p-8 shadow-2xl"
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">
+        <p className="mb-2 text-center text-xs uppercase tracking-[0.2em] text-slate-400">
+          Dillers Admin
+        </p>
+        <h2 className="mb-2 text-center text-2xl font-bold text-white">
           Вход для Админа
         </h2>
+        <p className="mb-5 text-center text-sm text-slate-400">
+          Введите email и пароль администратора
+        </p>
         {message && (
-          <p className="mb-4 text-red-600 text-center">{message}</p>
+          <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-center text-red-300">
+            {message}
+          </p>
         )}
 
         <input
@@ -52,7 +65,7 @@ export default function AdminLoginPage() {
           value={formData.email}
           onChange={handleChange}
           required
-          className="w-full p-2 border rounded mb-3"
+          className="mb-3 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
         />
         <input
           type="password"
@@ -61,12 +74,12 @@ export default function AdminLoginPage() {
           value={formData.password}
           onChange={handleChange}
           required
-          className="w-full p-2 border rounded mb-4"
+          className="mb-4 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
         />
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
+          className="w-full rounded-lg bg-blue-600 p-2 font-semibold text-white transition hover:bg-blue-500"
         >
           Войти
         </button>

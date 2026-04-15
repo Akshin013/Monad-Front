@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Breadcrumbs from "@/Components/Breadcrumbs";
+import Breadcrumbs from "../../../Components/Breadcrumbs";
 
 export default function SecuredLoanPage() {
   const [credits, setCredits] = useState([]);
@@ -12,7 +12,7 @@ export default function SecuredLoanPage() {
     const fetchCredits = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/products?subtype=SECURED_LOAN"
+          `${process.env.NEXT_PUBLIC_API_URL}/products?subtype=SECURED_LOAN`
         );
         const data = await res.json();
         setCredits(data);

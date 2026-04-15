@@ -12,7 +12,7 @@ export default function CreditApplicationForm({ credit }) {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:5000/api/applications", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/applications`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Breadcrumbs from "@/Components/Breadcrumbs";
+import Breadcrumbs from "../../../Components/Breadcrumbs";
 
 const TERMS = [
   { label: "Все", value: null },
@@ -26,7 +26,7 @@ export default function MortgagePage() {
     const fetchMortgages = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/products?category=CREDIT&subtype=MORTGAGE"
+          `${process.env.NEXT_PUBLIC_API_URL}/products?category=CREDIT&subtype=MORTGAGE`
         );
         const data = await res.json();
         setCredits(data);

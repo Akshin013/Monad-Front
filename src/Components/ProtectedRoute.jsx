@@ -1,5 +1,5 @@
 "use client";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../app/Context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -9,7 +9,7 @@ export default function ProtectedRoute({ role, children }) {
 
   useEffect(() => {
     if (!loading) {
-      if (!user) router.push("/auth/login");
+      if (!user) router.push("/Auth/Login");
       else if (role && user.role !== role) router.push("/");
     }
   }, [user, loading]);

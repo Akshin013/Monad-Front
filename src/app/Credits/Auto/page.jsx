@@ -35,7 +35,7 @@ const [initialPayment, setInitialPayment] = useState(null); // Первонач�
     const fetchAutoLoans = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/products?category=CREDIT&subtype=AUTO_LOAN"
+          `${process.env.NEXT_PUBLIC_API_URL}/products?category=CREDIT&subtype=AUTO_LOAN`
         );
         const data = await res.json();
         setProducts(data);

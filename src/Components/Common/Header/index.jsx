@@ -7,7 +7,7 @@ import Banks from '@/app/Banks/Page'
 const Header = () => {
   return (
     <div>
-      <div>
+      <div>ss
         <Link href="/">Home</Link>
         <Link href="/Banks">Banks</Link>
         <Link href="/Dealers">Dilers</Link>

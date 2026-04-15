@@ -1,21 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Breadcrumbs from "@/Components/Breadcrumbs";
+import Breadcrumbs from "../../../../Components/Breadcrumbs";
+import useProductView from "../../../../hooks/useProductView";
+import useProductClick from "../../../../hooks/useProductClick";
 
 export default function MortgageDetailPage() {
   const { id } = useParams();
+  const router = useRouter();
   const [credit, setCredit] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // ✅ Учёт просмотров
+  useProductView(id);
+
+  // ✅ Хук для кликов
+  const sendClick = useProductClick(id);
 
   useEffect(() => {
     const fetchMortgage = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:5000/api/products/${id}`
-        );
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${id}`);
         const data = await res.json();
         setCredit(data);
       } catch (err) {
@@ -61,13 +68,9 @@ export default function MortgageDetailPage() {
       <div className="max-w-5xl mx-auto bg-[#08162c] rounded-2xl shadow-xl p-8">
         {/* Заголовок */}
         <p className="text-blue-400 mb-2">Ипотечный кредит</p>
-        <h1 className="text-3xl font-bold text-white mb-4">
-          {credit.title}
-        </h1>
+        <h1 className="text-3xl font-bold text-white mb-4">{credit.title}</h1>
 
-        <p className="text-slate-300 mb-8">
-          {credit.description}
-        </p>
+        <p className="text-slate-300 mb-8">{credit.description}</p>
 
         {/* Основные условия */}
         {credit.credit && (
@@ -81,8 +84,7 @@ export default function MortgageDetailPage() {
             </Info>
 
             <Info label="Процентная ставка">
-              от {credit.credit.interestRateFrom}% до{" "}
-              {credit.credit.interestRateTo}%
+              от {credit.credit.interestRateFrom}% до {credit.credit.interestRateTo}%
             </Info>
 
             <Info label="Первоначальный взнос">
@@ -90,34 +92,33 @@ export default function MortgageDetailPage() {
             </Info>
 
             <Info label="Обеспечение">
-              {credit.credit.collateralRequired
-                ? "Требуется залог"
-                : "Без залога"}
+              {credit.credit.collateralRequired ? "Требуется залог" : "Без залога"}
             </Info>
 
-            <Info label="Валюта">
-              {credit.currency}
-            </Info>
+            <Info label="Валюта">{credit.currency}</Info>
           </div>
         )}
 
         {/* Кнопки */}
         <div className="flex flex-col sm:flex-row gap-4">
-          <a
-            href={credit.credit?.websiteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl text-center transition font-semibold"
-          >
-            Подать заявку
-          </a>
+          {credit.credit?.websiteUrl && (
+            <a
+              href={credit.credit.websiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={sendClick} // ✅ Учёт клика
+              className="flex-1 bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl text-center transition font-semibold"
+            >
+              Подать заявку
+            </a>
+          )}
 
-          <Link
-            href="/Credits/Mortgage"
+          <button
+            onClick={() => router.push("/Credits/Mortgage")}
             className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl text-center transition"
           >
             Назад к списку
-          </Link>
+          </button>
         </div>
       </div>
     </div>

@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+// import { useAuth } from "../../Context/AuthContext"; // Добавьте правильный путь к вашему AuthContext
+import { useAuth } from "../../../hooks/useAuth.js"; // Добавьте правильный путь к вашему AuthContext
 
 export default function AdminProductsPage() {
+  const { token } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterCategory, setFilterCategory] = useState("");
@@ -12,141 +15,345 @@ export default function AdminProductsPage() {
   const [editingProduct, setEditingProduct] = useState(null);
 
   const fetchProducts = async () => {
+    if (!token) return;
+    
     setLoading(true);
     let query = [];
     if (filterCategory) query.push(`category=${filterCategory}`);
     if (filterStatus) query.push(`status=${filterStatus}`);
     if (search) query.push(`title=${search}`);
-    const res = await fetch(`http://localhost:5000/api/products?${query.join("&")}`);
-    const data = await res.json();
-    setProducts(data);
-    setLoading(false);
+    
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/products?${query.join("&")}`, {
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        }
+      });
+      const data = await res.json();
+      setProducts(data);
+    } catch (error) {
+      console.error("Ошибка загрузки продуктов:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, [filterCategory, filterStatus, search]);
+    if (token) {
+      fetchProducts();
+    }
+  }, [filterCategory, filterStatus, search, token]);
 
   const handleDelete = async (id) => {
     if (!confirm("Удалить продукт?")) return;
-    await fetch(`/http://localhost:5000/api/products/${id}`, { method: "DELETE" });
-    fetchProducts();
+    
+    try {
+      // Используем admin роут
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/products/${id}`, { 
+        method: "DELETE",
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        }
+      });
+      
+      if (res.ok) {
+        fetchProducts();
+      } else {
+        const errorData = await res.json();
+        alert(errorData.message || "Ошибка при удалении продукта");
+      }
+    } catch (error) {
+      console.error("Ошибка удаления:", error);
+      alert("Ошибка при удалении продукта");
+    }
   };
 
-  const handleSave = async (updatedProduct) => {
-    await fetch(`/http://localhost:5000/api/products/${updatedProduct._id}`, {
+const handleSave = async (updatedProduct) => {
+  try {
+    // Создаем чистый объект для отправки, убираем служебные поля MongoDB
+    const { _id, __v, createdAt, updatedAt, ...productData } = updatedProduct;
+    
+    console.log("Отправляемые данные:", productData); // Для отладки
+    
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/products/${_id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedProduct),
+      headers: { 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}` 
+      },
+      body: JSON.stringify(productData),
     });
-    setEditingProduct(null);
-    fetchProducts();
+    
+    if (res.ok) {
+      const data = await res.json();
+      console.log("Продукт обновлен:", data);
+      setEditingProduct(null);
+      fetchProducts();
+    } else {
+      const errorData = await res.json();
+      console.error("Ошибка сервера:", errorData);
+      alert(errorData.message || "Ошибка при сохранении изменений");
+    }
+  } catch (error) {
+    console.error("Ошибка сохранения:", error);
+    alert("Ошибка при сохранении изменений");
+  }
+};
+
+  const getCategoryBadge = (category) => {
+    const badges = {
+      CARD: "bg-purple-100 text-purple-700",
+      CREDIT: "bg-green-100 text-green-700",
+      INSURANCE: "bg-blue-100 text-blue-700"
+    };
+    return badges[category] || "bg-gray-100 text-gray-700";
   };
+
+  const getStatusBadge = (status) => {
+    const badges = {
+      PENDING: "bg-yellow-100 text-yellow-700",
+      APPROVED: "bg-green-100 text-green-700",
+      REJECTED: "bg-red-100 text-red-700"
+    };
+    return badges[status] || "bg-gray-100 text-gray-700";
+  };
+
+  if (!token) {
+    return (
+      <div className="p-8 min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-12 text-center">
+            <p className="text-slate-400 text-lg">Необходима авторизация</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 bg-blue-900 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Продукты</h1>
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6 md:mb-8">  
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Продукты</h1>
+          <p className="text-slate-400 text-sm md:text-base">Управление продуктами и услугами</p>
+        </div>
 
-      {/* Фильтры */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="border rounded-lg p-2 bg-blue-900 shadow-sm focus:ring-2 focus:ring-blue-400"
-        >
-          <option value="">Все категории</option>
-          <option value="CARD">Карты</option>
-          <option value="CREDIT">Кредиты</option>
-          <option value="INSURANCE">Страхование</option>
-        </select>
+        {/* Фильтры */}
+        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4 md:p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Категория
+              </label>
+              <select
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="w-full border border-slate-700 rounded-lg p-3 bg-slate-950 text-slate-100 focus:ring-2 focus:ring-blue-500/30 transition-all"
+              >
+                <option value="">Все категории</option>
+                <option value="CARD">Карты</option>
+                <option value="CREDIT">Кредиты</option>
+                <option value="INSURANCE">Страхование</option>
+              </select>
+            </div>
 
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="border rounded-lg p-2 bg-blue-900 shadow-sm focus:ring-2 focus:ring-blue-400"
-        >
-          <option value="">Все статусы</option>
-          <option value="PENDING">Ожидает</option>
-          <option value="APPROVED">Одобрено</option>
-          <option value="REJECTED">Отклонено</option>
-        </select>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Статус
+              </label>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-full border border-slate-700 rounded-lg p-3 bg-slate-950 text-slate-100 focus:ring-2 focus:ring-blue-500/30 transition-all"
+              >
+                <option value="">Все статусы</option>
+                <option value="PENDING">Ожидает</option>
+                <option value="APPROVED">Одобрено</option>
+                <option value="REJECTED">Отклонено</option>
+              </select>
+            </div>
 
-        <input
-          type="text"
-          placeholder="Поиск по названию"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border rounded-lg p-2 flex-1 shadow-sm focus:ring-2 focus:ring-blue-400"
-        />
-      </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Поиск
+              </label>
+              <input
+                type="text"
+                placeholder="Поиск по названию..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full border border-slate-700 rounded-lg p-3 bg-slate-950 text-slate-100 focus:ring-2 focus:ring-blue-500/30 transition-all"
+              />
+            </div>
+          </div>
+        </div>
 
-      {/* Таблица */}
-      {loading ? (
-        <p className="text-gray-500">Загрузка...</p>
-      ) : (
-        <div className="overflow-x-auto rounded-lg shadow">
-          <table className="min-w-full bg-white border border-gray-200">
-            <thead className="bg-blue-50">
-              <tr>
-                {["ID", "Название", "Категория", "Подтип", "Статус", "Активно", "Действия"].map(
-                  (header) => (
-                    <th
-                      key={header}
-                      className="text-left px-4 py-2 text-gray-700 font-medium border-b"
-                    >
-                      {header}
-                    </th>
-                  )
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((p, i) => (
-                <tr
+        {/* Контент */}
+        {loading ? (
+          <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-12 text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+            <p className="text-slate-400 mt-4">Загрузка...</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-12 text-center">
+            <p className="text-slate-400 text-lg">Продукты не найдены</p>
+          </div>
+        ) : (
+          <>
+            {/* Десктопная таблица */}
+            <div className="hidden lg:block rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-slate-800">
+                    <tr>
+                      {["ID", "Название", "Категория", "Подтип", "Статус", "Активно", "Действия"].map(
+                        (header) => (
+                          <th
+                            key={header}
+                            className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider"
+                          >
+                            {header}
+                          </th>
+                        )
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-transparent divide-y divide-slate-800">
+                    {products.map((p) => (
+                      <tr
+                        key={p._id}
+                        className="hover:bg-slate-800/70 transition-colors duration-150"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">
+                          {p._id.slice(-6)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-slate-100">{p.title}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getCategoryBadge(p.category)}`}>
+                            {p.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
+                          {p.subtype}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(p.status)}`}>
+                            {p.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {p.is_active ? (
+                            <span className="text-green-600 text-xl">✓</span>
+                          ) : (
+                            <span className="text-red-600 text-xl">✕</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex gap-2">
+                            <button
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-all duration-200 hover:shadow-lg text-xs"
+                              onClick={() => setEditingProduct(p)}
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-all duration-200 hover:shadow-lg text-xs"
+                              onClick={() => handleDelete(p._id)}
+                            >
+                              🗑️
+                            </button>
+                            <Link
+                              href={`/Admin/Products/${p._id}`}
+                              className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg transition-all duration-200 hover:shadow-lg inline-flex items-center text-xs"
+                            >
+                              👁️
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Мобильные карточки */}
+            <div className="lg:hidden space-y-4">
+              {products.map((p) => (
+                <div
                   key={p._id}
-                  className={i % 2 === 0 ? "bg-gray-100" : "bg-gray-300 hover:bg-gray-100"}
+                  className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow"
                 >
-                  <td className="px-4 py-2 text-sm text-blue-700">{p._id}</td>
-                  <td className="px-4 py-2 text-blue-700">{p.category}</td>
-                  <td className="px-4 py-2 text-blue-700">{p.title}</td>
-                  <td className="px-4 py-2 text-blue-700">{p.subtype}</td>
-                  <td className="px-4 py-2 text-blue-700">{p.status}</td>
-                  <td className="px-4 py-2 text-blue-700">{p.is_active ? "Да" : "Нет"}</td>
-                  <td className="px-4 py-2 text-blue-700 flex gap-2">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                        {p.title}
+                      </h3>
+                      <p className="text-xs text-gray-500 font-mono">
+                        ID: {p._id.slice(-6)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {p.is_active ? (
+                        <span className="text-green-600 text-xl">✓</span>
+                      ) : (
+                        <span className="text-red-600 text-xl">✕</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex flex-wrap gap-2">
+                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getCategoryBadge(p.category)}`}>
+                        {p.category}
+                      </span>
+                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadge(p.status)}`}>
+                        {p.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Подтип:</span> {p.subtype}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2 pt-3 border-t border-gray-100">
                     <button
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition"
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4  rounded-lg transition-all duration-200 text-sm font-medium"
                       onClick={() => setEditingProduct(p)}
                     >
-                      Редактировать
+                      ✏️ 
                     </button>
                     <button
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition"
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium"
                       onClick={() => handleDelete(p._id)}
                     >
-                      Удалить
+                      🗑️
                     </button>
                     <Link
-                      href={`/admin/products/${p._id}`}
-                      className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded transition"
+                      href={`/Admin/Products/${p._id}`}
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium inline-flex items-center"
                     >
-                      Детали
+                      👁️
                     </Link>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </div>
+          </>
+        )}
 
-      {/* Модальное редактирование */}
-      {editingProduct && (
-        <EditProductModal
-          product={editingProduct}
-          onClose={() => setEditingProduct(null)}
-          onSave={handleSave}
-        />
-      )}
+        {/* Модальное редактирование */}
+        {editingProduct && (
+          <EditProductModal
+            product={editingProduct}
+            onClose={() => setEditingProduct(null)}
+            onSave={handleSave}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -177,41 +384,46 @@ function EditProductModal({ product, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-blue-900 bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-blue-900 p-6 rounded-xl shadow-2xl max-h-[90vh] overflow-auto w-full max-w-4xl">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Редактировать продукт</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-auto w-full max-w-4xl">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-primary to-accent p-4 md:p-6 rounded-t-2xl sticky top-0 z-10">
+          <h2 className="text-xl md:text-2xl font-bold text-white">✏️ Редактировать продукт</h2>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-6">
           {/* Основные поля */}
-          <div className="grid gap-4 md:grid-cols-2" >
+          <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2">
             <div>
-              <label className="block mb-1 font-medium  text-gray-700">Название</label>
+              <label className="block mb-2 font-semibold text-gray-700 text-sm md:text-base">Название</label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="border rounded-lg p-2 w-full shadow-sm focus:ring-2 focus:ring-blue-400"
+                className="border border-gray-300 rounded-lg p-3 w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm md:text-base"
               />
             </div>
             <div>
-              <label className="block mb-1 font-medium  text-gray-700">Описание</label>
+              <label className="block mb-2 font-semibold text-gray-700 text-sm md:text-base">Описание</label>
               <textarea
                 name="description"
                 value={formData.description || ""}
                 onChange={handleChange}
-                className="border rounded-lg p-2 w-full shadow-sm focus:ring-2 focus:ring-blue-400"
+                rows="3"
+                className="border border-gray-300 rounded-lg p-3 w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none text-sm md:text-base"
               />
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="font-medium text-gray-700">Категория</label>
+              <label className="block mb-2 font-semibold text-gray-700 text-sm md:text-base">Категория</label>
               <select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="border rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
+                className="border border-gray-300 rounded-lg p-3 w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm md:text-base"
               >
                 <option value="CARD">Карты</option>
                 <option value="CREDIT">Кредиты</option>
@@ -219,90 +431,111 @@ function EditProductModal({ product, onClose, onSave }) {
               </select>
             </div>
             <div>
-              <label className="font-medium text-gray-700">Подтип</label>
+              <label className="block mb-2 font-semibold text-gray-700 text-sm md:text-base">Подтип</label>
               <input
                 type="text"
                 name="subtype"
                 value={formData.subtype}
                 onChange={handleChange}
-                className="border rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
+                className="border border-gray-300 rounded-lg p-3 w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm md:text-base"
               />
             </div>
             <div>
-              <label className="font-medium text-gray-700">Статус</label>
+              <label className="block mb-2 font-semibold text-gray-700 text-sm md:text-base">Статус</label>
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="border rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
+                className="border border-gray-300 rounded-lg p-3 w-full shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm md:text-base"
               >
                 <option value="PENDING">Ожидает</option>
                 <option value="APPROVED">Одобрено</option>
                 <option value="REJECTED">Отклонено</option>
               </select>
             </div>
-            <div className="flex items-center mt-6 gap-2">
-              <label className="font-medium text-gray-700">Активно</label>
-              <input
-                type="checkbox"
-                name="is_active"
-                checked={formData.is_active}
-                onChange={handleChange}
-                className="w-5 h-5"
-              />
+            <div className="flex items-end">
+              <label className="flex items-center gap-2 cursor-pointer bg-gray-50 p-3 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-all w-full">
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  checked={formData.is_active}
+                  onChange={handleChange}
+                  className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="font-semibold text-gray-700 text-sm md:text-base">Активно</span>
+              </label>
             </div>
           </div>
 
-          {/* Credit / Card секция */}
+          {/* Credit секция */}
           {formData.category === "CREDIT" && formData.credit && (
-            <div className="border p-4 rounded-lg bg-blue-50">
-              <h3 className="font-semibold mb-2 text-gray-700">Поля кредита</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {["minAmount", "maxAmount", "interestRateFrom", "interestRateTo"].map((field) => (
-                  <input
-                    key={field}
-                    type="number"
-                    placeholder={field}
-                    value={formData.credit[field] || ""}
-                    onChange={(e) => handleNestedChange("credit", field, e.target.value)}
-                    className="border rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-400"
-                  />
+            <div className="border-2 border-green-200 p-4 md:p-6 rounded-xl bg-green-50">
+              <h3 className="font-bold text-base md:text-lg mb-4 text-green-800 flex items-center gap-2">
+                💳 Параметры кредита
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { field: "minAmount", label: "Мин. сумма" },
+                  { field: "maxAmount", label: "Макс. сумма" },
+                  { field: "interestRateFrom", label: "Ставка от %" },
+                  { field: "interestRateTo", label: "Ставка до %" }
+                ].map(({ field, label }) => (
+                  <div key={field}>
+                    <label className="block mb-2 font-medium text-gray-700 text-sm">{label}</label>
+                    <input
+                      type="number"
+                      placeholder={label}
+                      value={formData.credit[field] || ""}
+                      onChange={(e) => handleNestedChange("credit", field, e.target.value)}
+                      className="border border-gray-300 rounded-lg p-3 w-full shadow-sm focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-sm md:text-base"
+                    />
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
+          {/* Card секция */}
           {formData.category === "CARD" && formData.card && (
-            <div className="border p-4 rounded-lg   ">
-              <h3 className="font-semibold mb-2 text-gray-700">Поля карты</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {["creditLimit", "cashbackPercent", "annualFee"].map((field) => (
-                  <input
-                    key={field}
-                    type="number"
-                    placeholder={field}
-                    value={formData.card[field] || ""}
-                    onChange={(e) => handleNestedChange("card", field, e.target.value)}
-                    className="border rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-green-400"
-                  />
+            <div className="border-2 border-purple-200 p-4 md:p-6 rounded-xl bg-purple-50">
+              <h3 className="font-bold text-base md:text-lg mb-4 text-purple-800 flex items-center gap-2">
+                💳 Параметры карты
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  { field: "creditLimit", label: "Кредитный лимит" },
+                  { field: "cashbackPercent", label: "Кэшбэк %" },
+                  { field: "annualFee", label: "Годовое обслуживание" }
+                ].map(({ field, label }) => (
+                  <div key={field}>
+                    <label className="block mb-2 font-medium text-gray-700 text-sm">{label}</label>
+                    <input
+                      type="number"
+                      placeholder={label}
+                      value={formData.card[field] || ""}
+                      onChange={(e) => handleNestedChange("card", field, e.target.value)}
+                      className="border border-gray-300 rounded-lg p-3 w-full shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-sm md:text-base"
+                    />
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="flex justify-end gap-3 mt-6">
+          {/* Кнопки действий */}
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white pb-2">
             <button
               type="button"
-              className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-lg transition"
+              className="bg-gray-500 hover: bg-gray-600 text-white px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-lg font-semibold order-2 sm:order-1"
               onClick={onClose}
             >
-              Закрыть
+              ✕ Отмена
             </button>
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-lg transition"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-lg font-semibold order-1 sm:order-2"
             >
-              Сохранить
+              ✓ Сохранить
             </button>
           </div>
         </form>

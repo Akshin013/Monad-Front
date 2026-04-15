@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { apiRequest } from "../../Services/auth.js";
+// import { apiRequest } from "@/Services/auth.js";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function VerifyPage() {
@@ -34,7 +35,7 @@ export default function VerifyPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#05204A] text-white">
-      <form className="bg-[#0B3D91] p-8 rounded-lg shadow-lg w-96" onSubmit={handleSubmit}>
+      <form className="bg-primary p-8 rounded-lg shadow-lg w-96" onSubmit={handleSubmit}>
         <h1 className="text-2xl font-bold mb-6 text-center">Подтверждение Email</h1>
         {error && <div className="bg-red-500 p-2 rounded mb-4 text-center">{error}</div>}
 

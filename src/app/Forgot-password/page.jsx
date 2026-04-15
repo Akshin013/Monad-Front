@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { apiRequest } from "@/Services/api.js";
+import { apiRequest } from "../../Services/api.js";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#05204A] text-white">
-      <form className="bg-[#0B3D91] p-8 rounded-lg shadow-lg w-96" onSubmit={handleSubmit}>
+      <form className="bg-primary p-8 rounded-lg shadow-lg w-96" onSubmit={handleSubmit}>
         <h1 className="text-2xl font-bold mb-6 text-center">Восстановление пароля</h1>
         {error && <div className="bg-red-500 p-2 rounded mb-4 text-center">{error}</div>}
         {message && <div className="bg-green-500 p-2 rounded mb-4 text-center">{message}</div>}
