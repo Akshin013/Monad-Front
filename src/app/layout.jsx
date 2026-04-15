@@ -4,7 +4,7 @@ import Footer from "../Components/Common/Footer";
 import Providers from "./providers";
 import MobileBanner from "../Components/Banners/MobileBanner";
 import SideBanners from "../Components/Banners/SideBanners";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 // 📡 баннер
 async function getSideBanner() {
@@ -34,9 +34,10 @@ async function getSideBanner() {
 // 📡 статус сайта
 async function getMaintenanceStatus() {
   try {
-    const res = await fetch("http://localhost:5000/api/settings/status", {
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/settings/status`,
+      { cache: "no-store" }
+    );
 
     const data = await res.json();
     return data.maintenance;
@@ -45,12 +46,12 @@ async function getMaintenanceStatus() {
   }
 }
 
-// 🔥 ГЛАВНОЕ
+// 🔥 ROOT LAYOUT
 export default async function RootLayout({ children }) {
   const maintenance = await getMaintenanceStatus();
   const sideBanner = await getSideBanner();
 
-  // 🚧 если сайт в режиме обслуживания → редирект
+  // // 🚧 режим обслуживания
   // if (maintenance === true) {
   //   redirect("/Maintenance");
   // }
@@ -61,12 +62,10 @@ export default async function RootLayout({ children }) {
         <Providers>
           <Navbar />
 
-          {/* мобильные баннеры */}
           <div className="2xl:hidden">
             <MobileBanner />
           </div>
 
-          {/* десктоп */}
           <div className="hidden lg:flex">
             {sideBanner && (
               <div className="w-64 hidden 2xl:flex">
@@ -85,7 +84,6 @@ export default async function RootLayout({ children }) {
             )}
           </div>
 
-          {/* мобилка */}
           <div className="lg:hidden">{children}</div>
 
           <Footer />
