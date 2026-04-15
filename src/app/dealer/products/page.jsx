@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getDealerProducts } from "@/Services/products.js";
+import { getDealerProducts } from "../../../Services/products.js";
 
 export default function DealerProducts() {
   const [products, setProducts] = useState([]);
