@@ -1,7 +1,6 @@
 "use client";
 
-// import { AuthProvider } from "@/hooks/useAuth";
-import { AuthProvider } from "../hooks/useAuth.js";
+import { AuthProvider } from "./Context/AuthContext";
 
 export default function Providers({ children }) {
   return <AuthProvider>{children}</AuthProvider>;
