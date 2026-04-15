@@ -31,7 +31,7 @@
 import { NextRequest } from "next/server";
 import formidable from "formidable";
 import fs from "fs";
-import cloudinary from "@/utils/cloudinary";
+import cloudinary from "../../../utils/cloudinary";
 
 // App Router: отключаем парсер тела
 export const runtime = "nodejs"; 

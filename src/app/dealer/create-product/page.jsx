@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { createProduct } from "@/Services/products";
+import { createProduct } from "../../../Services/products.js";
 
 export default function CreateProduct() {
   const [name, setName] = useState("");

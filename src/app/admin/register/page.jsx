@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { apiRequest } from "@/Services/api.js"; // твой метод для fetch
-import { useAuth } from "@/app/Context/AuthContext";
+import { apiRequest } from "../../../Services/api.js"; // твой метод для fetch
+import { useAuth } from "../../Context/AuthContext";
 
 export default function RegisterAdmin() {
   const { user } = useAuth(); // текущий залогиненный админ
